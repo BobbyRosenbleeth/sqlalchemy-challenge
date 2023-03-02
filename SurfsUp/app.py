@@ -28,7 +28,7 @@ session = Session(engine)
 #################################################
 # Flask Setup
 #################################################
-## WORK NEEDED HERE ##
+app = Flask(__name__)
 
 
 #################################################
@@ -37,8 +37,16 @@ session = Session(engine)
 
 @app.route("/")
 def welcome():
-## WORK NEEDED HERE ##
-
+    """List all of the available routes."""
+    # List all of the available options.
+    return (
+        f"Available Routes:<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/temp/<start><br/>"
+        f"/api/v1.0/temp/<start>/<end>"
+    )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -52,8 +60,14 @@ def precipitation():
 
     session.close()
     # Dict with date as the key and prcp as the value
-    ## WORK NEEDED HERE ##
-    return ## WORK NEEDED HERE ##
+    weather = []
+    for date,prcp in precipitation:
+        weather_dict = {}
+        weather_dict["date"] = date
+        weather_dict["precipitation"] = prcp
+        weather.append(weather_dict)
+
+    return jsonify(weather_dict)
 
 
 @app.route("/api/v1.0/stations")
@@ -65,7 +79,7 @@ def stations():
 
     # Unravel results into a 1D array and convert to a list
     stations = list(np.ravel(results))
-    return ## WORK NEEDED HERE ##
+    return jsonify(stations)
 
 
 @app.route("/api/v1.0/tobs")
@@ -111,10 +125,10 @@ def stats(start=None, end=None):
         session.close()
 
         temps = list(np.ravel(results))
-        return ## WORK NEEDED HERE ##
+        return jsonify(temps)
 
     # calculate TMIN, TAVG, TMAX with start and stop
-    ## WORK NEEDED HERE ##
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
     results = session.query(*sel).\
         filter(Measurement.date >= start).\
@@ -124,8 +138,8 @@ def stats(start=None, end=None):
 
     # Unravel results into a 1D array and convert to a list
     temps = list(np.ravel(results))
-    return ## WORK NEEDED HERE ##
+    return jsonify(temps)
 
 
 if __name__ == '__main__':
-    ## WORK NEEDED HERE ##
+    app.run(debug=True)
